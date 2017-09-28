@@ -84,12 +84,14 @@
         this.$refs.profile.setLogger(item)
       },
       openMessage () {
-        this.$refs.msg.show(() => {
-          this.$refs.notice.classList.remove('active')
-        })
+        this.$refs.msg.show()
       },
-      notice () {
-        this.$refs.notice.classList.add('active')
+      notice (open) {
+        if (open) {
+          this.$refs.notice.classList.remove('notice')
+        } else {
+          this.$refs.notice.classList.add('notice')
+        }
       }
     },
     beforeRouteLeave (to, from, next) {

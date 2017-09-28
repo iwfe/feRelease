@@ -9,6 +9,7 @@ const user = require('../controller/user')
 const log = require('../controller/log')
 const upload = require('../controller/upload')
 const uploadStatic = busboy(conf.staticDirectory)
+// const uploadImage = busboy(conf.staticDirectory)
 const route = new Router({ prefix: '/' })
 
 route.get('signin', util.render)
@@ -38,6 +39,7 @@ route.get('app/getItemRecent', util.checkLogin, item.getItemRecent)
 
 route.get('app/openUpoad', util.checkLogin, upload.open)
 route.post('app/uploadItem', util.checkLogin, upload.createFile, upload.unZip, upload.computedFiles)
+// route.post('uploadImg', util.checkLogin, config.)
 route.post('uploadStatic', control.staticCheckKey, uploadStatic, control.staticUpload)
 
 route.post('app/logger', util.checkLogin, log.post)

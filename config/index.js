@@ -104,7 +104,7 @@ const config = {
         bucket: 'iwjw-resource',
         folder: ''
     }],
-    staticUrl: `http://10.7.252.92:${port}/uploadStatic`,
+    staticUrl: `http://10.7.252.92:${port}/uploadStatic`, // 静态上传服务器地址
     // staticUrl: `http://${ip}:${port}/uploadStatic`,
     staticKey: 'iwjw-fe-release',
     staticDirectory: { // 静态上传配置

@@ -47,24 +47,21 @@ export default {
           appendMessage(list, 'message', '<span class="user_me">我</span><span class="content" style="background: #AED581;color: #333;">' + msg.content + '</span>')
         } else if (msg.privateLetter) {
           appendMessage(list, 'message', '<span class="user">' + msg.from + '</span><span class="content" style="background: #EA80FC;color: #fff;">' + msg.content + '</span>')
+          this.$emit('notice', this.state)
         } else {
           appendMessage(list, 'message', '<span class="user">' + msg.from + '</span><span class="content">' + msg.content + '</span>')
+          this.$emit('notice', this.state)
         }
         list.scrollTop = list.scrollHeight
-      }
-      if (!this.state) {
-        this.$emit('Notice')
       }
     })
     socket.emit('chat message', window.config.id)
   },
 
   methods: {
-    show (cb) {
+    show () {
       this.state = !this.state
-      if (this.state) {
-        cb()
-      }
+      this.$emit('notice', this.state)
     },
     addUser (e) {
       const tar = e.target

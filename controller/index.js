@@ -8,6 +8,10 @@ const conf = require('../config')
 
 module.exports = {
 
+  async postImg (ctx) {
+    //
+  },
+
   async staticCheckKey (ctx, next) {
     try {
       fse.emptyDirSync(path.resolve(__dirname, '../dist'))
