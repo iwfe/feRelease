@@ -1,0 +1,14 @@
+.DS_Store
+Thumbs.db
+db.json
+config/oss.*
+*.log
+node_modules/
+public/
+.deploy*/
+.tmp
+*.codekit
+.vscode
+dist/*
+zip/*
+tmp/*

@@ -1,0 +1,61 @@
+a,
+input,
+textarea,
+botton,
+select {
+  outline: 0;
+  background-color: transparent;
+  text-decoration: none;
+  border-style: none;
+  color: inherit;
+}
+
+input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0px 1000px #000 inset;
+}
+
+/* 修改背景色。chrome自动填充的表单，改background-color无效 */
+input:-webkit-autofill{
+    -webkit-box-shadow: 0 0 0px 1000px #000 inset;
+}
+/* 修改文字颜色。chrome自动填充的表单，改color无效 */
+input:-webkit-autofill{
+    -webkit-text-fill-color: #ccc;
+}
+
+ol, ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+html {
+  overflow-y: scroll;
+}
+
+html, body {
+  /* 禁止用户选择文本 */
+  user-select: none;
+  /* 截断长单词 */
+  word-break:break-all;
+  -webkit-tap-highlight-color: red;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+body {
+  /* 让字体变得平滑*/
+  /* -webkit-font-smoothing: antialiased; */
+  font-family: Roboto, Noto, Helvetica, Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  color: #666;
+  font-size: 12px;
+  line-height: 1.5;
+  /* 页面缩放失效 */
+  -webkit-text-size-adjust: 100%;
+  -webkit-transition: background-color .3s;
+}

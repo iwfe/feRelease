@@ -1,0 +1,142 @@
+#fe-toast-top,
+#fe-toast-bottom,
+#fe-toast-middle{
+  text-align: center;
+  position: fixed;
+  width: 100%;
+  left: 0;
+}
+#fe-toast-top{
+  top: -40px;
+  animation-name: top;
+  -webkit-animation-name: top;
+}
+#fe-toast-middle{
+  top: 50%;
+  animation-name: middle;
+  -webkit-animation-name: middle;
+}
+#fe-toast-bottom{
+  bottom: -40px;
+  animation-name: bottom;
+  -webkit-animation-name: bottom;
+}
+#fe-toast-mask{
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  content: '';
+  background: #ddd;
+}
+@-webkit-keyframes middle{
+  0%{opacity: 0}
+  to{opacity: 1}
+}
+@-webkit-keyframes top{
+  50%{top: 15px}
+  to{top: 12px}
+}
+@-webkit-keyframes bottom{
+  50%{bottom: 15px}
+  to{bottom: 12px}
+}
+@keyframes middle{
+  0%{opacity: 0}
+  to{opacity: 1}
+}
+@keyframes top{
+  50%{top: 15px}
+  to{top: 12px}
+}
+@keyframes bottom{
+  50%{bottom: 15px}
+  to{bottom: 12px}
+}
+/*位置和列表都用到动画*/
+.fe-toast,
+.fe-animated {
+  animation-duration: .3s;
+  animation-fill-mode: both;
+  -webkit-animation-duration: .3s;
+  -webkit-animation-fill-mode: both;
+}
+/*列表对象*/
+.fe-toast span{
+  min-width: 4em;
+  color: #f0f0f0;
+  font-size: 16px;
+  padding: 12px 16px;
+  text-align: center;
+  border-radius: 5px;
+  display: inline-block;
+  vertical-align: top;
+  background: rgba(000, 000, 000, 0.5);
+}
+/*纵排*/
+.fe-toast > div{
+  margin-top: 6px;
+}
+/*横排*/
+.fe-toast span+span{
+  margin-left: 6px;
+  margin-bottom: 10px;
+}
+/*图标统一定义*/
+.fe-toast .iconfont{
+  display: block;
+  font-size: 46px;
+  margin-bottom: 4px;
+}
+/*自动结束*/
+.fe-toast .fe-animated{
+  animation-name: fe-end-opacity;
+  -webkit-animation-name: fe-end-opacity;
+}
+@-webkit-keyframes fe-end-opacity{
+  0%{opacity: 1;}
+  to{opacity: 0;}
+}
+@keyframes fe-end-opacity{
+  0%{opacity: 1;}
+  to{opacity: 0;}
+}
+/*点击结束*/
+.fe-toast .fe-animated.click{
+  animation-name: fe-end-scale;
+  -webkit-animation-name: fe-end-scale;
+}
+@-webkit-keyframes fe-end-scale{
+  0%{transform: scale(1);opacity: 1;}
+  to{transform: scale(1.5);opacity: 0;}
+}
+@keyframes fe-end-scale{
+  0%{transform: scale(1);opacity: 1;}
+  to{transform: scale(1.5);opacity: 0;}
+}
+/*出场动画 通过参数传递  scale opacity*/
+.fe-toast .fe-scale{
+  animation-name: fe-scale;
+  -webkit-animation-name: fe-scale;
+}
+.fe-toast .fe-opacity{
+  animation-name: fe-opacity;
+  -webkit-animation-name: fe-opacity;
+}
+@-webkit-keyframes fe-scale{
+  50%{transform: scale(1.1)}
+  to{transform: scale(1)}
+}
+@keyframes fe-scale{
+  50%{transform: scale(1.1)}
+  to{transform: scale(1)}
+}
+@-webkit-keyframes fe-opacity{
+  0%{opacity: 0}
+  to{opacity: 1}
+}
+@keyframes fe-opacity{
+  0%{opacity: 0}
+  to{opacity: 1}
+}

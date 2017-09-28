@@ -1,0 +1,110 @@
+@media only screen and (max-width: 749px) and (min-width: 400px)  {
+  #all .item_position {
+    width: calc(90vw / 1);
+  }
+  #all .item_position:nth-child(1n) {
+    margin-right: 0;
+  }
+  #all header .done a {
+    width: 80px;
+  }
+  #main .item .item_position {
+    width: calc((100vw - 330px) / 1);
+    height: calc((100vw - 360px) / 1.33);
+    margin-right: 0;
+  }
+  #main section .search {
+    width: 57vw;
+  }
+}
+
+@media only screen and (max-width: 899px) and (min-width: 750px) {
+  #all .item_position {
+    width: calc((90vw - 20px) / 2);
+  }
+  #all .item_position:nth-child(2n) {
+    margin-right: 0;
+  }
+  #main .item .item_position {
+    width: calc((100vw - 330px) / 1);
+    height: calc((100vw - 360px) / 1.33);
+    margin-right: 0;
+  }
+  #main section .search {
+    width: 57vw;
+  }
+}
+
+@media only screen and (max-width: 1250px) and (min-width: 900px) {
+  #all .item_position {
+    width: calc((90vw - 40px) / 3);
+  }
+  #all .item_position:nth-child(3n) {
+    margin-right: 0;
+  }
+  #main .item .item_position {
+    width: calc((100vw - 348px) / 2);
+    height: calc((100vw - 460px) / 2.66);
+  }
+  #main .item .item_position:nth-child(2n) {
+    margin-right: 0;
+  }
+  #main section .search {
+    width: 33vw;
+  }
+}
+
+@media only screen and (max-width: 1599px) and (min-width: 1251px) {
+  #all .item_position {
+    width: calc((90vw - 60px) / 4);
+  }
+  #all .item_position:nth-child(4n) {
+    margin-right: 0;
+  }
+  #main .item .item_position {
+    width: calc((100vw - 368px) / 3);
+    height: calc((100vw - 710px) / 3);
+
+  }
+  #main .item .item_position:nth-child(3n) {
+    margin-right: 0;
+  }
+  #main section .search {
+    width: calc((100vw - 368px) / 2);
+  }
+}
+
+@media only screen and (max-width: 2000px) and (min-width: 1600px) {
+  #all .item_position {
+    width: calc((90vw - 60px) / 5);
+  }
+  #all .item_position:nth-child(5n) {
+    margin-right: 0;
+  }
+  #main .item .item_position {
+    width: calc((100vw - 405px) / 4);
+    height: calc((100vw - 640px) / 5.33);
+  }
+  #main .item .item_position:nth-child(4n) {
+    margin-right: 0;
+  }
+  #main section .search {
+    width: calc(((100vw - 365px) / 2))
+  }
+}
+
+@media only screen and (max-width: 5000px) and (min-width: 2000px) {
+  #all .item_position {
+    width: calc((100vw - 430px) / 4);
+  }
+  #all .item_position:nth-child(4n) {
+    margin-right: 0;
+  }
+  #main .item .item_position {
+    width: calc((100vw - 430px) / 4);
+    height: calc((100vw - 340px) / 5.33);
+  }
+  #main .item .item_position:nth-child(4n) {
+    margin-right: 0;
+  }
+}

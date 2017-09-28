@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= htmlWebpackPlugin.options.title %></title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+</head>
+<body>
+<script>
+window.config = {
+  dev: <%= htmlWebpackPlugin.options.dev %>,
+  staticUrl: <%= JSON.stringify(htmlWebpackPlugin.options.staticUrl) %>,
+  siteUrl: <%= JSON.stringify(htmlWebpackPlugin.options.siteUrl) %>,
+  id: 'ea1bfdd0488611e796e87b3a4105f646',
+  name: 'wenhao',
+  star: 'cdd45ff048fe11e7974a1f0b5b76ab38',
+  error: ''
+}
+</script>
+<div id="root"></div>
+</body>
+</html>
