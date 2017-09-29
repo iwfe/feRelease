@@ -151,6 +151,9 @@
 </script>
 
 <style>
+  body::-webkit-scrollbar {
+    width: 0;
+  }
   #video {position: fixed;width: 100%;right: 0;top: 0;}
   .login {
     position: fixed;
@@ -160,7 +163,7 @@
     height: 100%;
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: center;
     font-size: 14px;
     color: #fff;
   }
@@ -169,7 +172,7 @@
     position: relative;
     width: 240px;
     height: 350px;
-    margin-right: 24px;
+    margin-top: -24px;
   }
   .login .a,.login .b {
     position: absolute;
@@ -182,6 +185,7 @@
     backface-visibility: hidden;
     border: 1px solid rgba(255, 255, 255, .5);
     border-radius: 4px;
+    background: rgba(000, 000, 000, .5);
   }
   .login .b {transform: rotateY(180deg);}
   .start { position: relative;font-size: 16px;}
