@@ -30,9 +30,6 @@ Date.prototype.Format = function (fmt) {
 }
 
 // 阻止上传.map文件
-// 新建的项目 不存在开关，配置 前端下载按钮隐藏掉
-// 前端不需要看见id号
-// 目录名不可以用中文
 const upload = {
   createFile: async (ctx, next) => {
     fse.emptyDirSync(abs('../tmp')) // 清空
@@ -150,7 +147,7 @@ const upload = {
     const params = ctx._params
     const bucket = params.bucket.bucket
     const resource = params.bucket.folder
-    let manifest = []
+    let manifest = [] // 需要加版本号的文件
 
     // 获取 manifest
     if (fs.existsSync(abs(`../tmp/${params.name}/manifest.json`))) {
