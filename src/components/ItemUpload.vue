@@ -175,19 +175,21 @@ export default {
           let add = ''
           let diff = ''
           if (_add.length >= 1) {
-            add = '<div style="text-align: left;">新增文件：</div>'
+            add = '<div style="text-align: left;"><span style="float: left;">新增文件：</span>'
             for (const key in res.data.add) {
-              add += '<div style="text-align: left;">' + key + '</div>'
+              add += '<div style="margin-left: 75px;">' + key + '</div>'
             }
+            add += '</div>'
           } else {
             add = '<div style="text-align: left;">新增文件：无</div>'
           }
 
           if (_diff.length >= 1) {
-            diff = '<div style="text-align: left;">变更文件：</div>'
+            diff = '<div style="text-align: left;"><span style="float: left;">变更文件：</span>'
             for (const key in res.data.add) {
-              diff += '<div style="text-align: left;">' + key + '</div>'
+              diff += '<div style="margin-left: 75px;">' + key + '</div>'
             }
+            diff += '</div>'
           } else {
             diff = '<div style="text-align: left;">变更文件：无</div>'
           }

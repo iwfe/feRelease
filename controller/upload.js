@@ -62,7 +62,7 @@ const upload = {
     if (dev === 'test' || dev === 'beta') {
       ctx._params.devName = name + '_' + dev + '/'
     } else {
-      ctx._params.devName = ''
+      ctx._params.devName = '' // 向上环境暂时没验证
     }
 
     if (!util.getDev(dev)) {
@@ -217,7 +217,11 @@ const upload = {
       })
 
       util.forEach(md5, (val, key) => {
-        if (_db[key] !== val) {
+        // 如果数据库不存在 或者上次上传失败
+        // _db[key] 就等于 undefined
+        // undefined !== md5 就成立了
+        // 因此变更文件会出现新增文件
+        if (_db[key] && _db[key] !== val) {
           diff[key] = local[key] // 变动
           _md5[key] = val // md5
         }
@@ -240,8 +244,7 @@ const upload = {
       if (Object.keys(add).length) {
         util.forEach(add, async (val, key) => {
           const _key = resource + params.devName + util.addVersion(key, params.version)
-          const _os = await _oss.uploadFileStream(bucket, _key, val)
-          _os.then(async (res) => {
+          const _os = await _oss.uploadFileStream(bucket, _key, val).then(async (res) => {
             if (res && res.url) {
               // if (params.dev === 'prod') {
               //   res.url = ''
@@ -250,7 +253,12 @@ const upload = {
               const createTime = date[0]['now()'] // 创建时间
               const updateTime = date[0]['now()'] // 更新时间
               const fileMd5 = md5File.sync(val)
-              await mysql(params.dev, `INSERT INTO iw_static_resource (keyPath,ossUrl,version,projectId,createTime,updateTime,fileMd5) VALUES ('${key}','${res.url}','${params.version}','${params.projectId}','${createTime}','${updateTime}',${fileMd5})`)
+              const insert = `INSERT INTO iw_static_resource (keyPath,ossUrl,version,projectId,createTime,updateTime,fileMd5) VALUES ('${key}','${res.url}','${params.version}','${params.projectId}','${createTime}','${updateTime}','${fileMd5}')`
+              const result = await mysql(params.dev, insert).then(() => {
+                console.log(res)
+              }).catch((err) => {
+                console.log('添加文件失败')
+              })
             }
           })
         })
