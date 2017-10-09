@@ -32,8 +32,9 @@ const routes = [
         component: ItemView,
         beforeEnter: (to, from, next) => {
           store.dispatch('selectMenu')
-          store.dispatch('getItemRecent')
-          next()
+          store.dispatch('getItemRecent', () => {
+            next()
+          })
         }
       },
       {

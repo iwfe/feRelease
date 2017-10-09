@@ -25,8 +25,8 @@
         <span>
           <i :data-tips="[v.onoff === 1 ? '开启' : '未开启']" class="iconfont icon-state tips_hover" @click="openState($event, v)" v-show="v.onoff !== 1"><b></b></i>
           <i data-tips="上传" class="iconfont icon-shangchuan tips_hover" @click="upload(v)"><b></b></i>
-          <a v-if="v.onoffPath" :href="v.onoffPath" target="_blank"><i data-tips="开关下载" class="iconfont icon-wenjian tips_hover"><b></b></i></a>
-          <a v-if="v.propertiesPath" :href="v.propertiesPath" target="_blank"><i data-tips="配置下载" class="iconfont icon-wenjian tips_hover"><b></b></i></a>
+          <a v-if="v.onoffPath" :href="v.onoffPath" target="_blank"><i data-tips="开关下载" class="iconfont icon-wenjianjiasuoding tips_hover"><b></b></i></a>
+          <a v-if="v.propertiesPath" :href="v.propertiesPath" target="_blank"><i data-tips="配置下载" class="iconfont icon-peizhiwenjianicon tips_hover"><b></b></i></a>
           <i :data-tips="[v.star === 1 ? '取消关注' : '添加关注']" v-if="itemStyle === 'grid' && $route.name === 'item' && $route.params.menu !== 'all'" :class="{'active': v.star === 1}" @click="handlerStar($event, v, 'add')" class="iconfont icon-xingxing tips_hover"><b></b></i>
           <i data-tips="编辑" class="iconfont icon-bianji tips_hover" @click="editItem(v)"><b></b></i>
           <i data-tips="删除" class="iconfont icon-lajitong tips_hover" @click="delItem(v)" v-show="$route.params.menu === 'all'"><b></b></i>
