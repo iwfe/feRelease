@@ -61,10 +61,11 @@ const util = {
         }
     },
     fail (ctx, code) {
-        code = typeof code === 'number' ? msg[code] : code
+        const str = typeof code === 'number' ? msg[code] : code
         ctx.body = {
             status: -1,
-            msg: code
+            msg: str,
+            code
         }
     },
     // test (ctx) {

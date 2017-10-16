@@ -12,7 +12,9 @@ const rp = require('request-promise')
 const formidable = require("formidable") // multipart/form-data 解析
 const log = (str) => {console.log(str)}
 const abs = (url) => path.resolve(__dirname, url)
-
+// 未做处理
+// 阻止上传.map文件
+//
 Date.prototype.Format = function (fmt) {
     var o = {
         "M+": this.getMonth() + 1, //月份
@@ -29,116 +31,129 @@ Date.prototype.Format = function (fmt) {
     return fmt;
 }
 
-// 阻止上传.map文件
+
 const upload = {
+  /*
+    效验参数是否合法
+    上传zip包到临时目录
+   */
   createFile: async (ctx, next) => {
-    fse.emptyDirSync(abs('../tmp')) // 清空
-    const form = new formidable.IncomingForm() // 创建解析formdata对象
-    form.uploadDir = abs('../tmp') // 上传目录
-    form.keepExtensions = true // 保留扩展名
-    const parseZip = () => { // 解析参数
+    fse.emptyDirSync(abs('../tmp'))
+
+    const form = new formidable.IncomingForm()
+      form.keepExtensions = true
+      form.uploadDir = abs('../tmp')
+      form.encoding = 'utf-8'
+
+    const parseZip = () => {
       return new Promise((resolve, reject) => {
         form.on('file', (field, file) => {
-          fs.renameSync(file.path, form.uploadDir + "/" + file.name) // 完整包名
+          if (field === 'file' && file.path) {
+            fs.renameSync(file.path, form.uploadDir + "/" + file.name)
+          } else {
+            reject()
+          }
         })
-
         form.parse(ctx.req, (err, fields, files) => {
-          const params = fields // 参数files里, zip对象在files
-          params['name'] = files.file.name.replace(/.zip$/, '') // 过滤后缀
-          resolve(params)
+          const name = files.file.name.replace(/.zip$/, '')
+          const {
+            dev,
+            version,
+            projectId
+          } = fields
+
+          if (!util.getDev(dev) && !projectId) {
+            reject(1006)
+            return // reject 后代码会继续执行
+          }
+
+          // 兼容 命令上传
+          if (!version) {
+            const arr = item[0].version.split('.')
+            ctx._params.version = parseInt(arr[arr.length - 1]) + 1
+          }
+
+          // name 带 _test 和 _beta 环境为标识
+          if (dev === 'test' || dev === 'beta') {
+            fields['devName'] = name + '_' + dev + '/'
+          } else {
+            fields['devName'] = ''
+          }
+          fields['name'] = name
+          resolve(fields)
         })
       })
     }
 
-    ctx._params = await parseZip()
-
-    const {
-      dev,
-      name,
-      version,
-      projectId
-    } = ctx._params
-
-    if (dev === 'test' || dev === 'beta') {
-      ctx._params.devName = name + '_' + dev + '/'
-    } else {
-      ctx._params.devName = '' // 向上环境暂时没验证
-    }
-
-    if (!util.getDev(dev)) {
-      util.fail(ctx, 1007)
-      return
-    }
-
-    if (!projectId || !name) {
-      util.fail(ctx, 1006)
-      return
-    }
-
-    const item = await mysql(dev, 'select * from iw_static_project where id=' + projectId)
-    if (!item || name.indexOf(item[0].folderName)) {
-      util.fail(ctx, 20011)
-      return
-    }
-
-    if (!version) {
-      const arr = item[0].version.split('.')
-      ctx._params.version = parseInt(arr[arr.length - 1]) + 1
-    }
-
-    // 计算筒
-    const bucket = conf['bucket_' + dev]
-    ctx._params.bucket = bucket[item[0].ossType - 1]
-
-    await next()
+    await parseZip().then(async (params) => {
+      ctx._params = params
+      const item = await mysql(ctx._params.dev, 'select * from iw_static_project where id=' + ctx._params.projectId)
+      if (item || ctx._params.name === item[0].folderName) {
+        if (item[0].ossType >= 1 && item[0].ossType <= 3 ) {
+          const bucket = conf['bucket_' + ctx._params.dev] // 对应的筒子 和 二级目录
+          ctx._params.bucket = bucket[item[0].ossType - 1]
+          await next()
+        } else {
+          util.fail(ctx, 20012)
+        }
+      } else {
+        util.fail(ctx, 20011)
+      }
+    }).catch((code) => {
+      util.fail(ctx, code)
+    })
   },
 
+  /*
+    解压zip
+    统一目录层级
+   */
   unZip: async (ctx, next) => {
     const files = fs.readdirSync(abs('../tmp'))
-    if (files && files.length >= 1) {
-      // 获取item名称
-      const name = files[0]
-      if (name) {
-        const pro = () => {
-          return new Promise((resolve, reject) => {
-            fs.createReadStream(abs('../tmp/' + name)) // 读取
-            .pipe(unzip.Extract({ path: abs('../tmp') })) // 解压
-            .on('close', () => {
-              // 过滤项目名
-              const itemName = name.replace(/.zip/, '')
-              const url = fs.existsSync(abs('../tmp/' + itemName)) // 路径是否存在
-              // 路径是否存在
-              if (!url) {
-                // 不存在目录文件
-                const _files = fs.readdirSync(abs('../tmp/'))
-                if (_files.length > 1) {
-                  fs.mkdirSync(abs('../tmp/' + itemName))
-                  util.forEach(_files, (val) => {
-                    fs.renameSync(abs('../tmp/' + val), abs('../tmp/' + itemName + '/' + val))
-                  })
-                } else {
-                  reject('zip里没有文件')
-                  console.log('请确认zip包是否解压出来，解压出来是否有文件存在')
-                }
-                // 解压完后在删除zip
-                fs.unlink(abs('../tmp/' + name.replace(/.zip/, '') + '/' + name), () => { // 移除
-                  resolve(name) // 返回项目名字
-                })
-              } else {
-                fs.unlink(abs('../tmp/' + name), () => { // 移除
-                  resolve(name) // 返回项目名字
-                })
-              }
-            })
+
+    if (!files && files.length > 1) {
+      util.fail(ctx, 20013)
+      return
+    }
+
+    const name = files[0]
+    if (name) {
+      // 解压
+      const _unzip = () => {
+        return new Promise((resolve, reject) => {
+          fs.createReadStream(abs('../tmp/' + name))
+          .pipe(unzip.Extract({ path: abs('../tmp') }))
+          .on('close', (res) => {
+            resolve()
           })
-        }
-        await pro()
-        await next()
-      } else {
-        log('临时文件里不存在zip包')
+        })
       }
+
+      await _unzip().then(() => {
+        const itemname = ctx._params.name
+        const _path = fs.existsSync(abs('../tmp/' + itemname))
+        if (!_path) {
+          const _files = fs.readdirSync(abs('../tmp/')) // 解压出来不包含文件夹
+          if (_files.length > 1) {
+            fs.mkdirSync(abs('../tmp/' + itemname))
+            util.forEach(_files, (val) => {
+              fs.renameSync(abs('../tmp/' + val), abs('../tmp/' + itemname + '/' + val))
+            })
+            fs.unlinkSync(abs('../tmp/' + itemname + '/' + name))
+          } else {
+            util.fail(ctx, 20014)
+            return
+          }
+        } else {
+          fs.unlinkSync(abs('../tmp/' + name))
+          // 加压出来是文件目录，就不去效验文件下的文件了
+        }
+      })
+
+      await next()
     } else {
-      log('临时文件为空，请确认上传包是否存在！')
+      util.fail(ctx, 20013)
+      return
     }
   },
 
@@ -227,44 +242,44 @@ const upload = {
         }
       })
 
-      if (Object.keys(diff).length) {
-        util.forEach(diff, async (val, key) => {
-          const _key = resource + params.devName + util.addVersion(key, params.version)
-          await _oss.uploadFileStream(bucket, _key, val).then(async (res) => {
-            if (res && res.url) {
-              const s = `update iw_static_resource set ossUrl='${res.url}', version='${params.version}', fileMd5='${_md5[key]}' where id=${_id[key]}`
-              await mysql(params.dev, s)
-            }
-          })
-        })
-      } else {
-        log('没有变动文件')
-      }
+      // if (Object.keys(diff).length) {
+      //   util.forEach(diff, async (val, key) => {
+      //     const _key = resource + params.devName + util.addVersion(key, params.version)
+      //     await _oss.uploadFileStream(bucket, _key, val).then(async (res) => {
+      //       if (res && res.url) {
+      //         const s = `update iw_static_resource set ossUrl='${res.url}', version='${params.version}', fileMd5='${_md5[key]}' where id=${_id[key]}`
+      //         await mysql(params.dev, s)
+      //       }
+      //     })
+      //   })
+      // } else {
+      //   log('没有变动文件')
+      // }
 
-      if (Object.keys(add).length) {
-        util.forEach(add, async (val, key) => {
-          const _key = resource + params.devName + util.addVersion(key, params.version)
-          const _os = await _oss.uploadFileStream(bucket, _key, val).then(async (res) => {
-            if (res && res.url) {
-              // if (params.dev === 'prod') {
-              //   res.url = ''
-              // }
-              const date = await mysql(params.dev, 'select now()')
-              const createTime = date[0]['now()'] // 创建时间
-              const updateTime = date[0]['now()'] // 更新时间
-              const fileMd5 = md5File.sync(val)
-              const insert = `INSERT INTO iw_static_resource (keyPath,ossUrl,version,projectId,createTime,updateTime,fileMd5) VALUES ('${key}','${res.url}','${params.version}','${params.projectId}','${createTime}','${updateTime}','${fileMd5}')`
-              const result = await mysql(params.dev, insert).then(() => {
-                console.log(res)
-              }).catch((err) => {
-                console.log('添加文件失败')
-              })
-            }
-          })
-        })
-      } else {
-        log('没有新增文件')
-      }
+      // if (Object.keys(add).length) {
+      //   util.forEach(add, async (val, key) => {
+      //     const _key = resource + params.devName + util.addVersion(key, params.version)
+      //     const _os = await _oss.uploadFileStream(bucket, _key, val).then(async (res) => {
+      //       if (res && res.url) {
+      //         // if (params.dev === 'prod') {
+      //         //   res.url = ''
+      //         // }
+      //         const date = await mysql(params.dev, 'select now()')
+      //         const createTime = date[0]['now()'] // 创建时间
+      //         const updateTime = date[0]['now()'] // 更新时间
+      //         const fileMd5 = md5File.sync(val)
+      //         const insert = `INSERT INTO iw_static_resource (keyPath,ossUrl,version,projectId,createTime,updateTime,fileMd5) VALUES ('${key}','${res.url}','${params.version}','${params.projectId}','${createTime}','${updateTime}','${fileMd5}')`
+      //         const result = await mysql(params.dev, insert).then(() => {
+      //           console.log(res)
+      //         }).catch((err) => {
+      //           console.log('添加文件失败')
+      //         })
+      //       }
+      //     })
+      //   })
+      // } else {
+      //   log('没有新增文件')
+      // }
     } else {
       // 新上传的项目
       util.forEach(local, async (val, key) => {
@@ -286,37 +301,37 @@ const upload = {
     }
 
     // 生成配置文件
-    const date = new Date()
-    let str = '#update time is ' + new Date().Format("yyyy-MM-dd hh:mm:ss") + '\n'
-    const items = await mysql(params.dev, 'select * from iw_static_resource where projectId=' + params.projectId)
-    if (!items || items.length <= 0) {
-      log('应该不存在此情况')
-      return
-    }
-    util.forEach(items, (val, key) => {
-      str += val['keyPath'] + '=' + val['ossUrl'] + '\n'
-    })
-    fs.openSync(abs('../tmp/staticResource.properties'), 'a')
-    fs.writeFileSync(abs('../tmp/staticResource.properties'), str)
-    await _oss.uploadFileStream(bucket, resource + params.devName + 'staticResource.properties', abs('../tmp/staticResource.properties')).then((res) => {
-      log(res.url)
-    })
+    // const date = new Date()
+    // let str = '#update time is ' + new Date().Format("yyyy-MM-dd hh:mm:ss") + '\n'
+    // const items = await mysql(params.dev, 'select * from iw_static_resource where projectId=' + params.projectId)
+    // if (!items || items.length <= 0) {
+    //   log('应该不存在此情况')
+    //   return
+    // }
+    // util.forEach(items, (val, key) => {
+    //   str += val['keyPath'] + '=' + val['ossUrl'] + '\n'
+    // })
+    // fs.openSync(abs('../tmp/staticResource.properties'), 'a')
+    // fs.writeFileSync(abs('../tmp/staticResource.properties'), str)
+    // await _oss.uploadFileStream(bucket, resource + params.devName + 'staticResource.properties', abs('../tmp/staticResource.properties')).then((res) => {
+    //   log(res.url)
+    // })
 
     // 生成开关文件
-    str = '#update time is ' + new Date().Format("yyyy-MM-dd hh:mm:ss") + '\n'
-    const conf_md5 = md5File.sync(abs('../tmp/staticResource.properties'))
-    fs.openSync(abs('../tmp/staticResourceConfig.properties'), 'a')
-    str += 'staticResourceMD5=' + conf_md5 + '\n'
-    str += 'staticResourceMD5Order=' + conf_md5 + '\n'
-    str += 'autoReload=false'
-    fs.writeFileSync(abs('../tmp/staticResourceConfig.properties'), str)
-    await _oss.uploadFileStream(bucket, resource + params.devName + 'staticResourceConfig.properties', abs('../tmp/staticResourceConfig.properties')).then((res) => {
-      log(res.url)
-    })
+    // str = '#update time is ' + new Date().Format("yyyy-MM-dd hh:mm:ss") + '\n'
+    // const conf_md5 = md5File.sync(abs('../tmp/staticResource.properties'))
+    // fs.openSync(abs('../tmp/staticResourceConfig.properties'), 'a')
+    // str += 'staticResourceMD5=' + conf_md5 + '\n'
+    // str += 'staticResourceMD5Order=' + conf_md5 + '\n'
+    // str += 'autoReload=false'
+    // fs.writeFileSync(abs('../tmp/staticResourceConfig.properties'), str)
+    // await _oss.uploadFileStream(bucket, resource + params.devName + 'staticResourceConfig.properties', abs('../tmp/staticResourceConfig.properties')).then((res) => {
+    //   log(res.url)
+    // })
 
-    if (Object.keys(add).length || Object.keys(diff).length) {
-      await mysql(params.dev, 'update iw_static_project set version="' + params.version + '", onoff=0 where id=' + params.projectId)
-    }
+    // if (Object.keys(add).length || Object.keys(diff).length) {
+    //   await mysql(params.dev, 'update iw_static_project set version="' + params.version + '", onoff=0 where id=' + params.projectId)
+    // }
 
     const result = {
       projectId: params.projectId,
@@ -327,16 +342,16 @@ const upload = {
       time: new Date().Format("yyyy-MM-dd hh:mm:ss")
     }
 
-    if (params.auto === 'open') {
-      ctx.request.query.id = params.projectId
-      ctx.request.query.dev = params.dev
-      ctx.request.query.name = params.name
-      await upload.open(ctx).then((res) => {
-        if (res.status === 1) {
-          result.auto = true
-        }
-      })
-    }
+    // if (params.auto === 'open') {
+    //   ctx.request.query.id = params.projectId
+    //   ctx.request.query.dev = params.dev
+    //   ctx.request.query.name = params.name
+    //   await upload.open(ctx).then((res) => {
+    //     if (res.status === 1) {
+    //       result.auto = true
+    //     }
+    //   })
+    // }
     util.success(ctx, result)
   },
 

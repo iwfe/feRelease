@@ -38,8 +38,9 @@ route.post('app/getItemStar', util.checkLogin, item.getItemStar)
 route.get('app/getItemRecent', util.checkLogin, item.getItemRecent)
 
 route.get('app/openUpoad', util.checkLogin, upload.open)
-route.post('app/uploadItem', util.checkLogin, upload.createFile, upload.unZip, upload.computedFiles)
+// route.post('app/uploadItem', util.checkLogin, upload.createFile, upload.unZip, upload.computedFiles)
 // route.post('uploadImg', util.checkLogin, config.)
+route.post('app/uploadItem', util.checkLogin, upload.createFile, upload.unZip, upload.computedFiles)
 route.post('uploadStatic', control.staticCheckKey, uploadStatic, control.staticUpload)
 
 route.post('app/logger', util.checkLogin, log.post)

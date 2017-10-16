@@ -91,7 +91,7 @@ const config = {
         folder: 'resource/'
     }, {
         bucket: 'house-test-water',
-        folder: ''
+        folder: 'resource/'
     }],
 
     bucket_prod: [{
