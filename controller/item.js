@@ -104,7 +104,6 @@ module.exports = {
         const params = {}
         user[dev].splice(n, 1)
         params[dev] = user[dev]
-        consolr.log(params)
         await ctx.mongo.db(conf.mongodb.db).collection('menu').update({ id: menu[i].id }, { $set: params })
       }
     }

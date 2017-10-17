@@ -40,13 +40,12 @@ route.get('app/getItemRecent', util.checkLogin, item.getItemRecent)
 route.get('app/openUpoad', util.checkLogin, upload.open)
 // route.post('app/uploadItem', util.checkLogin, upload.createFile, upload.unZip, upload.computedFiles)
 // route.post('uploadImg', util.checkLogin, config.)
-route.post('app/uploadItem', util.checkLogin, upload.createFile, upload.unZip, upload.computedFiles)
+route.post('app/uploadItem', util.checkLogin, upload.createTmp, upload.unZip, upload.processManifest, upload.computedFiles)
 route.post('uploadStatic', control.staticCheckKey, uploadStatic, control.staticUpload)
 
 route.post('app/logger', util.checkLogin, log.post)
 route.get('app/logger', log.get)
-
-route.post('feRelease', upload.createFile, upload.unZip, upload.computedFiles)
+route.post('feRelease', upload.createTmp, upload.unZip, upload.processManifest, upload.computedFiles)
 
 // 测试
 route.get('test', control.get)

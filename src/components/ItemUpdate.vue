@@ -17,14 +17,14 @@
         </div>
       </div> -->
 
-      <!-- <div class="win_item">
+      <div class="win_item">
         <div class="win_layout">上传域名</div>
         <div class="win_edit_item">
-          <select v-model="item_copy.ossType" style="width: 80%;border: 1px solid #ddd;height: 36px;line-height: 36px;">
+          <select disabled="true" v-model="item_copy.ossType" style="width: 80%;border: 1px solid #ddd;height: 36px;line-height: 36px;">
             <option v-for="(v, i) in getCdn" :value="v.key">{{ v.val }}</option>
           </select>
         </div>
-      </div> -->
+      </div>
 
       <div class="win_item">
         <div class="win_layout">项目简介</div>
@@ -71,6 +71,7 @@
         if (oldItem === newItem) {
           this.cancel()
         } else {
+          delete this.item_copy.ossType
           this.$store.dispatch('updateItem', this.item_copy)
           .then((res) => {
             // 手动更新 list 的数据

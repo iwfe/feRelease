@@ -91,7 +91,7 @@ const config = {
         folder: 'resource/'
     }, {
         bucket: 'house-test-water',
-        folder: 'resource/'
+        folder: ''
     }],
 
     bucket_prod: [{
@@ -112,8 +112,8 @@ const config = {
         fnDestFilename: (fieldname, filename) => {
             return fieldname + filename
         }
-    },
-    staticConf: 'http://house-test-water.oss.aliyuncs.com/resource/'
+    }
+    // staticConf: 'http://house-test-water.oss.aliyuncs.com/resource/'  // del
 }
 
 module.exports = config

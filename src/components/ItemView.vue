@@ -122,7 +122,7 @@
           Alert('亲，已经是开启状态了')
         } else {
           Confirm({
-            title: '确定开启' + item.name + '吗'
+            title: '确定开启<font style="color: red"> ' + item.name + ' </font>吗'
           }, (val) => {
             if (val === 'ok') {
               let dev = ''

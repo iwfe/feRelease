@@ -12,7 +12,6 @@ module.exports = (app) => {
     })
 
     socket.on('chat message', async (msg) => {
-      console.log(msg)
       if (!socket.name) {
         const data = await db.find({ id: msg })
         socket.name = data[0].name
