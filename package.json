@@ -93,6 +93,7 @@
     "opn": "^5.1.0",
     "optimize-js-plugin": "0.0.4",
     "progress-bar-webpack-plugin": "^1.10.0",
+    "request": "^2.83.0",
     "request-promise": "^4.2.1",
     "socket.io": "^2.0.3",
     "style-loader": "^0.18.0",

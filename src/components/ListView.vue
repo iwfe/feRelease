@@ -1,24 +1,11 @@
 <template>
   <div id="main">
-    <transition appear name="section">
-      <section>
-        <div class="search">
-          <input id="search_text" type="text" maxlength="18" class="input" @input="filterItem" ref="text" placeholder="搜索 应用名称 或 目录名称" />
-          <div class="search_box">
-            <i ref="close" class="iconfont icon-guanbi" style="padding-right: 8px; visibility: hidden;" @click="close"></i>
-            <i class="iconfont icon-fangdajing" style="opacity: .5;"></i>
-          </div>
-          <!-- <auto-view :item="items" :item-click="selectItem" /> -->
-        </div>
-      </section>
-    </transition>
-
     <header>
       <span v-if="$route.name === 'item'" class="path_ico">{{ $store.state.menuactive.name }} <b v-show="item.length">({{ item.length }})</b></span>
       <span v-if="$route.name === 'recent'" class="path_ico">最新上传的项目</span>
       <span v-if="$route.name === 'star'" class="path_ico fl" style="margin-right: 12px;">你的星级项目</span>
       <span v-if="$route.name === 'search'" class="path_ico">搜索结果</span>
-      <div style="position: absolute; right: 0;top: 0;">
+      <div style="float: right;">
         <span v-if="$route.name === 'star'" ref="delTips" style="visibility: hidden;">你确定删除所有加星项目吗? <a class="blue_btn" @click="delItem">是</a>或<a @click="delTips('hidden', 'block')" class="blue_btn">取消</a></span>
         <i v-if="$route.name === 'star' && item.length > 1" ref="lajitong" style="margin-right: 12px;" class="iconfont icon-lajitong" @click="delTips('visible', 'none')">Delete All</i>
         <i v-if="$route.name !== 'recent' && $route.name !== 'search' && $route.name !== 'star'" class="iconfont icon-recent-contacts tips_hover" @click="$router.push({ name: 'recent' })" data-tips="最近上传"><b></b></i>
@@ -31,6 +18,18 @@
     <item-view :item-style="itemStyle"></item-view>
     <div class="dividing" v-show="item.length >= 1" style="margin-top: 36px;"><span>{{ dividings }}</span></div>
     <div class="footer">{{ footers }}</div>
+    <transition appear name="section">
+      <section>
+        <div class="search">
+          <input id="search_text" type="text" maxlength="18" class="input" @input="filterItem" ref="text" placeholder="搜索 应用名称 或 目录名称" />
+          <div class="search_box">
+            <i ref="close" class="iconfont icon-guanbi" style="padding-right: 8px; visibility: hidden;" @click="close"></i>
+            <i class="iconfont icon-fangdajing" style="opacity: .5;"></i>
+          </div>
+          <!-- <auto-view :item="items" :item-click="selectItem" /> -->
+        </div>
+      </section>
+    </transition>
   </div>
 </template>
 
@@ -141,20 +140,22 @@
 <style lang="less">
 #main {
   margin-left: 100px;
-  padding: 15px 63px 20px 65px;
+  padding: 65px 63px 20px 65px;
   overflow-y: auto;
   box-sizing: border-box;
   -webkit-transition: margin-left .2s;
   &::-webkit-scrollbar { width: 0; }
   section {
-    position: relative;
+    position: fixed;
+    top: 0;
+    left: 66px;
+    right: 0;
     height: 45px;
+    padding-top: 15px;
+    padding-left: 100px;
     text-align: center;
     .search {
-      position: absolute;
-      left: 0;
-      margin: 0;
-      text-align: left;
+      position: relative;
     }
     .input {
       position: relative;
@@ -188,10 +189,10 @@
     }
   }
   header {
+    // display: flex;
     line-height: 50px;
     margin-right: 100px;
-    font-size: 14px;
-    position: relative;
+    font-size: 16px;
     .iconfont { margin-right: 4px;color: #999;cursor: pointer; }
     .icon_active { color: #666; }
     .path_ico {

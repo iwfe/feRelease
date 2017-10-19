@@ -110,14 +110,15 @@
   position: fixed;
   right: 20px;
   bottom: 30px;
-  width: 30px;
-  height: 30px;
-  line-height: 30px;
+  width: 42px;
+  height: 42px;
+  line-height: 42px;
   text-align: center;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 14px;
+  font-weight: 400;
+  border-radius: 50%;
   color: #fff;
-  background: #ccc;
   transition: transform .3s ease-out;
   transform: translateY(100px);
 }
@@ -148,7 +149,7 @@
   opacity: .6;
   color: #aaa;
   cursor: pointer;
-  margin-left: 6px;
+  margin-left: 12px;
 }
 .fixed_top .open_profile {
   width: 30px;

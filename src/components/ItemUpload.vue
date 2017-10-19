@@ -175,23 +175,23 @@ export default {
           let add = ''
           let diff = ''
           if (_add.length >= 1) {
-            add = '<div style="text-align: left;"><span style="float: left;">新增文件：</span>'
+            add = '<div class="text_left"><span style="float: left;">新增文件：</span>'
             for (const key in res.data.add) {
               add += '<div style="margin-left: 75px;">' + key + '</div>'
             }
             add += '</div>'
           } else {
-            add = '<div style="text-align: left;">新增文件：无</div>'
+            add = '<div class="text_left">新增文件：无</div>'
           }
 
           if (_diff.length >= 1) {
-            diff = '<div style="text-align: left;"><span style="float: left;">变更文件：</span>'
-            for (const key in res.data.add) {
+            diff = '<div class="text_left"><span style="float: left;">变更文件：</span>'
+            for (const key in res.data.diff) {
               diff += '<div style="margin-left: 75px;">' + key + '</div>'
             }
             diff += '</div>'
           } else {
-            diff = '<div style="text-align: left;">变更文件：无</div>'
+            diff = '<div class="text_left">变更文件：无</div>'
           }
 
           this.setState(false)
@@ -217,7 +217,7 @@ export default {
           this.item.onoff = res.data.auto ? 1 : 0 // 命令上传
           this.item.updateTime = res.data.time
           Alert({
-            text: '<div style="text-align: left;">项目名称：' + this.item.name + '</div><div style="text-align: left;">版本号码：' +  this.item.version + '</div>' + add + diff
+            text: '<div class="text_left">项目名称：' + this.item.name + '</div><div class="text_left">版本号码：' +  this.item.version + '</div>' + add + diff
           })
           // axios('pushMessage', 'get', { dev: this.dev, id: this.item.projectId })
           // 向所有关注项目的用户，推送消息
@@ -261,6 +261,10 @@ export default {
     height: 100%;
     background: #fff;
     opacity: .5;
+  }
+  .dialog .text_left {
+    clear: both;
+    text-align: left;
   }
 </style>
 

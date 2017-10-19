@@ -9,26 +9,28 @@ const oss = require('../util/oss')()
 const md5File = require('md5-file')
 const mysql = require('../util/mysql')
 const rp = require('request-promise')
+const request = require('request')
 const formidable = require("formidable") // multipart/form-data 解析
 const log = (str) => {console.log(str)}
 const abs = (url) => path.resolve(__dirname, url)
 let local = {}
 let fileMd5 = {}
+let text = ''
 
 Date.prototype.Format = function (fmt) {
-    var o = {
-        "M+": this.getMonth() + 1, //月份
-        "d+": this.getDate(), //日
-        "h+": this.getHours(), //小时
-        "m+": this.getMinutes(), //分
-        "s+": this.getSeconds(), //秒
-        "q+": Math.floor((this.getMonth() + 3) / 3), //季度
-        "S": this.getMilliseconds() //毫秒
-    };
-    if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
-    for (var k in o)
-    if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
-    return fmt;
+  var o = {
+    "M+": this.getMonth() + 1, //月份
+    "d+": this.getDate(), //日
+    "h+": this.getHours(), //小时
+    "m+": this.getMinutes(), //分
+    "s+": this.getSeconds(), //秒
+    "q+": Math.floor((this.getMonth() + 3) / 3), //季度
+    "S": this.getMilliseconds() //毫秒
+  };
+  if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length))
+  for (var k in o)
+  if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)))
+  return fmt
 }
 
 
@@ -38,6 +40,7 @@ const upload = {
     上传zip包到临时目录
    */
   createTmp: async (ctx, next) => {
+    log('上传文件')
     fse.emptyDirSync(abs('../tmp'))
 
     const form = new formidable.IncomingForm()
@@ -89,10 +92,10 @@ const upload = {
       const item = await mysql(ctx._params.dev, 'select * from iw_static_project where id=' + ctx._params.projectId)
       if (item || ctx._params.name === item[0].folderName) {
         if (item[0].ossType >= 1 && item[0].ossType <= 3 ) {
-          const bucket = conf['bucket_' + ctx._params.dev] // 对应的筒子 和 二级目录
+          const bucket = conf['bucket_' + ctx._params.dev]
           ctx._params.bucket = bucket[item[0].ossType - 1]
-          log('上传文件成功')
           await next()
+          log('上传文件成功')
         } else {
           util.fail(ctx, 20012)
         }
@@ -109,6 +112,7 @@ const upload = {
     统一目录层级
    */
   unZip: async (ctx, next) => {
+    log('解压文件')
     const files = fs.readdirSync(abs('../tmp'))
 
     if (!files && files.length > 1) {
@@ -148,7 +152,6 @@ const upload = {
           // 加压出来是文件目录，就不去效验文件下的文件了
         }
       })
-
       const files = rd.readSync(path.resolve(__dirname, '../tmp/' + ctx._params.name))
       util.forEach(files, (val) => {
         const len = val.indexOf(ctx._params.name)
@@ -157,8 +160,8 @@ const upload = {
           local[keyPath] = val
         }
       })
-      log('解压文件成功')
       await next()
+      log('解压文件成功')
     } else {
       util.fail(ctx, 20013)
     }
@@ -168,16 +171,14 @@ const upload = {
     处理Manifest，要添加版本号的文件
    */
   processManifest: async (ctx, next) => {
+    log('处理manifest')
     const params = ctx._params
     let manifest = []
-    // 获取 manifest
     if (fs.existsSync(abs(`../tmp/${params.name}/manifest.json`))) {
       const mf = fs.readFileSync(abs(`../tmp/${params.name}/manifest.json`), 'utf8')
       const d = JSON.parse(mf)
       if (d.versionFiles && d.versionFiles.length) {
         manifest = d.versionFiles
-      } else {
-        // log('manifest 缺少 versionFiles')
       }
     } else {
       const mf = await mysql(params.dev, 'select * from iw_static_manifest where projectId=' + params.projectId)
@@ -185,12 +186,9 @@ const upload = {
         for (let i = 0, len = mf.length; i < len; i++) {
           manifest.push(mf[i]['keyPath'])
         }
-      } else {
-        // log('manifest 没有记录此项目配置信息')
       }
     }
 
-    // 生成 md5
     if (manifest.length) {
       util.forEach(manifest, (val) => {
         const key = local[val]
@@ -201,22 +199,22 @@ const upload = {
         fileMd5[key] = md5File.sync(val)
       })
     }
-    log('manifest 处理完成')
     await next()
+    log('处理manifest成功')
   },
 
   /*
   对比变动和新增文件
-  ...
-  阻止上传.map文件
    */
   computedFiles: async (ctx) => {
+    log('查找新增和改动的文件')
     const add = {}
     const diff = {}
     const params = ctx._params
     const bucket = params.bucket.bucket
-
+    const itemPath = params.bucket.folder + params.devName
     const item = await mysql(params.dev, 'select * from iw_static_resource where projectId=' + params.projectId)
+
     if (item && item.length) {
       const _id = {}
       const _db = {}
@@ -233,6 +231,34 @@ const upload = {
           add[key] = local[key]
         }
       })
+      if (Object.keys(add).length) {
+        for (const key in add) {
+          const _key = itemPath + util.addVersion(key, params.version)
+          await oss.uploadFileStream(bucket, _key, add[key]).then(async (res) => {
+            if (res && res.url) {
+              res.url = res.url.replace('http:', '')
+              /* 处理发布环境url */
+              // if (params.dev === 'prod') {
+              //   res.url = ''
+              // }
+              const date = await mysql(params.dev, 'select now()')
+              const createTime = date[0]['now()']
+              const updateTime = date[0]['now()']
+              const _md5 = md5File.sync(add[key])
+              const sql = `INSERT INTO iw_static_resource (keyPath,ossUrl,version,projectId,createTime,updateTime,_md5) VALUES ('${key}','${res.url}','${params.version}','${params.projectId}','${createTime}','${updateTime}','${fileMd5}')`
+              const result = await mysql(params.dev, sql).then((res) => {
+                log(res)
+              }).catch((err) => {
+                util.fail(ctx, 20018)
+                return
+              })
+            } else {
+              util.fail(ctx, 20016)
+              return
+            }
+          })
+        }
+      }
 
       util.forEach(fileMd5, (val, key) => {
         // 如果数据库不存在 或者上次上传失败
@@ -244,89 +270,84 @@ const upload = {
           _md5[key] = val
         }
       })
+
       if (Object.keys(diff).length) {
-        util.forEach(diff, async (val, key) => {
-          const _key = params.bucket.folder + params.devName + util.addVersion(key, params.version)
-          await oss.uploadFileStream(bucket, _key, val).then(async (res) => {
+        for (const key in diff) {
+          const _key = itemPath + util.addVersion(key, params.version)
+          await oss.uploadFileStream(bucket, _key, diff[key]).then(async (res) => {
             if (res && res.url) {
-              const s = `update iw_static_resource set ossUrl='${res.url}', version='${params.version}', fileMd5='${_md5[key]}' where id=${_id[key]}`
-              await mysql(params.dev, s)
-            }
-          })
-        })
-      }
-      if (Object.keys(add).length) {
-        util.forEach(add, async (val, key) => {
-          const _key = params.bucket.folder + params.devName + util.addVersion(key, params.version)
-          const _os = await oss.uploadFileStream(bucket, _key, val).then(async (res) => {
-            log(res.url)
-            if (res && res.url) {
+              res.url = res.url.replace('http:', '')
+              /* 处理发布环境url */
               // if (params.dev === 'prod') {
               //   res.url = ''
               // }
-              const date = await mysql(params.dev, 'select now()')
-              const createTime = date[0]['now()'] // 创建时间
-              const updateTime = date[0]['now()'] // 更新时间
-              const fileMd5 = md5File.sync(val)
-              const insert = `INSERT INTO iw_static_resource (keyPath,ossUrl,version,projectId,createTime,updateTime,fileMd5) VALUES ('${key}','${res.url}','${params.version}','${params.projectId}','${createTime}','${updateTime}','${fileMd5}')`
-              const result = await mysql(params.dev, insert).then(() => {
-                // console.log(res)
+              const sql = `update iw_static_resource set ossUrl='${res.url}', version='${params.version}', fileMd5='${_md5[key]}' where id=${_id[key]}`
+              await mysql(params.dev, sql).then((res) => {
+                log(res)
               }).catch((err) => {
-                console.log('oss上传失败')
+                util.fail(ctx, 20017)
+                return
               })
+            } else {
+              util.fail(ctx, 20016)
+              return
             }
           })
-        })
+        }
       }
     } else {
-      util.forEach(local, async (val, key) => {
-        const _key = params.bucket.folder + params.devName + util.addVersion(key, params.version)
-        const _os = await oss.uploadFileStream(bucket, _key, val)
-        _os.then( async (res) => {
+      log('处理新增项目')
+      for (const key in local) {
+        const _key = itemPath + util.addVersion(key, params.version)
+        await oss.uploadFileStream(bucket, _key, local[key]).then(async (res) => {
           if (res && res.url) {
+            res.url = res.url.replace('http:', '')
             // if (params.dev === 'prod') {
               // 正式环境 来自 cdn 域名
             // }
             const date = await mysql(params.dev, 'select now()')
             const createTime = date[0]['now()']
             const updateTime = date[0]['now()']
-            const fileMd5 = md5File.sync(val)
+            const fileMd5 = md5File.sync(local[key])
             await mysql(params.dev, `INSERT INTO iw_static_resource (keyPath,ossUrl,version,projectId,createTime,updateTime,fileMd5) VALUES ('${key}','${res.url}','${params.version}','${params.projectId}','${createTime}','${updateTime}',${fileMd5})`)
           }
         })
-      })
+      }
     }
 
-    // 生成配置文件
-    let str = '#update time is ' + new Date().Format("yyyy-MM-dd hh:mm:ss") + '\n'
+    log('生成配置文件')
+    text = '#update time is ' + new Date().Format("yyyy-MM-dd hh:mm:ss") + '\n'
     const items = await mysql(params.dev, 'select * from iw_static_resource where projectId=' + params.projectId)
+
     util.forEach(items, (val, key) => {
-      str += val['keyPath'] + '=' + val['ossUrl'] + '\n'
+      text += val['keyPath'] + '=' + val['ossUrl'] + '\n'
     })
     fs.openSync(abs('../tmp/staticResource.properties'), 'a')
-    fs.writeFileSync(abs('../tmp/staticResource.properties'), str)
-    await oss.uploadFileStream(bucket, params.bucket.folder + params.devName + 'staticResource.properties', abs('../tmp/staticResource.properties')).then((res) => {
-      log(res.url)
-    })
-
-    // 生成开关文件
-    str = '#update time is ' + new Date().Format("yyyy-MM-dd hh:mm:ss") + '\n'
+    fs.writeFileSync(abs('../tmp/staticResource.properties'), text)
     const conf_md5 = md5File.sync(abs('../tmp/staticResource.properties'))
-    fs.openSync(abs('../tmp/staticResourceConfig.properties'), 'a')
-    str += 'staticResourceMD5=' + conf_md5 + '\n'
-    str += 'staticResourceMD5Order=' + conf_md5 + '\n'
-    str += 'autoReload=false'
-    fs.writeFileSync(abs('../tmp/staticResourceConfig.properties'), str)
-    await oss.uploadFileStream(bucket, params.bucket.folder + params.devName + 'staticResourceConfig.properties', abs('../tmp/staticResourceConfig.properties')).then((res) => {
-      log(res.url)
+    await oss.uploadFileStream(bucket, itemPath + 'staticResource.properties', abs('../tmp/staticResource.properties')).then((res) => {
+      // log(res.url)
     })
 
+    log('生成开关文件')
+    text = '#update time is ' + new Date().Format("yyyy-MM-dd hh:mm:ss") + '\n'
+    fs.openSync(abs('../tmp/staticResourceConfig.properties'), 'a')
+    text += 'staticResourceMD5=' + conf_md5 + '\n'
+    text += 'staticResourceMD5Order=' + conf_md5 + '\n'
+    text += 'autoReload=false'
+    fs.writeFileSync(abs('../tmp/staticResourceConfig.properties'), text)
+    await oss.uploadFileStream(bucket, itemPath + 'staticResourceConfig.properties', abs('../tmp/staticResourceConfig.properties')).then((res) => {
+      // log(res.url)
+    })
+
+    /* 更新数据项目表 */
     // if (Object.keys(add).length || Object.keys(diff).length) {
     await mysql(params.dev, 'update iw_static_project set version="' + params.version + '", onoff=0 where id=' + params.projectId)
     // }
 
     const result = {
       projectId: params.projectId,
+      version:  params.version,
       dev: params.dev,
       bucket,
       diff,
@@ -335,6 +356,7 @@ const upload = {
     }
 
     if (params.auto === 'open') {
+      log('自动开启')
       ctx.request.query.id = params.projectId
       ctx.request.query.dev = params.dev
       ctx.request.query.name = params.name
@@ -346,8 +368,8 @@ const upload = {
         }
       })
     }
-    local = '' // 文件 本地路径
-    fileMd5 = '' // 文件 md5
+    local = ''
+    fileMd5 = ''
     util.success(ctx, result)
   },
 
@@ -415,3 +437,23 @@ const upload = {
 }
 
 module.exports = upload
+
+// http://10.7.249.20:8134/weixinEnt/iwwallet/agentTrade/qiangKePayIndex
+// rp('http://house-test-water.oss.aliyuncs.com/iwjw-pc_beta/staticResource.properties').then((res) => {
+// })
+// const conf_md5 = md5File.sync(abs('../tmp/staticResource.properties'))
+// log(conf_md5)
+
+// const d = fs.createWriteStream('a.conf')
+// request('http://house-test-water.oss.aliyuncs.com/iwjw-wxent_beta/staticResource.properties').pipe(d).on('close', () => {
+//   const conf_md5 = md5File.sync(abs('../tmp/staticResource.properties'))
+//   log(conf_md5) // e4634d8dc07c13a8c0daf07f71dc8212
+// })
+
+// const d = fs.readFileSync(abs('../tmp/staticResourceConfig.properties'))
+// log('本地')
+// log(d)
+
+// http://house-test-water.oss.aliyuncs.com/iwjw-wxent_beta/qiangKePayIndex_5.js
+// http://house-test-water.oss.aliyuncs.com/iwjw-wxent_beta/qiangKePayIndex_5.css
+

@@ -1,8 +1,8 @@
 <template>
-  <div :class="[itemStyle === 'grid' ? 'item_tab' : 'item']" :style="{'min-height': item.length !== 0 ? 'calc(100vh - 122px)' : ''}">
-    <div v-if="itemStyle === 'grid' && item.length >= 1">
-      <div class="item_meta header">
-        <span></span>
+  <div :class="[itemStyle === 'grid' ? 'item_tab' : 'item']" :style="{'min-height': item.length !== 0 ? 'calc(100vh - 160px)' : ''}">
+    <div class="item_position" v-if="itemStyle === 'grid' && item.length >= 1">
+      <div class="item_meta">
+        <span>icon</span>
         <!-- <span style="width: 40px;flex: inherit;">id</span> -->
         <span>应用名称</span>
         <span style="width: 60px;flex: inherit;">版本号</span>
@@ -227,7 +227,7 @@
   .item_img_gray{-webkit-filter: grayscale(100%);opacity: .5;}
   .item_meta {display: flex;background: transparent;line-height: 32px;}
   .item_meta span {flex: 1;text-align: center;}
-  .item_meta span:first-child {flex: initial;width: 30px;padding-left: 6px;}
+  .item_meta span:first-child {flex: initial;width: 30px;padding-left: 12px;}
   .header {height: 36px;line-height: 36px;}
   .sort {position: relative;}
   .sort:before, .sort:after {width: 0;height: 0;overflow: hidden;border-color: transparent;border-top: 6px solid #ddd;}
