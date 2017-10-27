@@ -1,11 +1,11 @@
 <template>
   <div :class="[itemStyle === 'grid' ? 'item_tab' : 'item']" :style="{'min-height': item.length !== 0 ? 'calc(100vh - 160px)' : ''}">
-    <div class="item_position" v-if="itemStyle === 'grid' && item.length >= 1">
-      <div class="item_meta">
+    <div class="item_position"  v-if="itemStyle === 'grid' && item.length >= 1" style="padding: 0;">
+      <div class="item_meta item_thead">
         <span>icon</span>
         <!-- <span style="width: 40px;flex: inherit;">id</span> -->
         <span>应用名称</span>
-        <span style="width: 60px;flex: inherit;">版本号</span>
+        <span>版本号</span>
         <span>目录名称</span>
         <span>更新时间</span>
         <span>操作</span>
@@ -19,10 +19,10 @@
         </span>
         <!-- <span v-if="itemStyle === 'grid'" style="width: 40px;flex: inherit;">{{ v.id }}</span> -->
         <span>{{ v.name }}</span>
-        <span style="width: 80px;flex: inherit;">{{ v.version }}</span>
+        <span>{{ v.version }}</span>
         <span v-if="itemStyle === 'grid'">{{ v.folderName }}</span>
         <span v-if="itemStyle === 'grid'">{{ v.updateTime }}</span>
-        <span>
+        <span class="icon">
           <i :data-tips="[v.onoff === 1 ? '开启' : '未开启']" class="iconfont icon-state tips_hover" @click="openState($event, v)" v-show="v.onoff !== 1"><b></b></i>
           <i data-tips="上传" class="iconfont icon-shangchuan tips_hover" @click="upload(v)"><b></b></i>
           <a v-if="v.onoffPath" :href="v.onoffPath" target="_blank"><i data-tips="开关下载" class="iconfont icon-wenjianjiasuoding tips_hover"><b></b></i></a>
@@ -221,16 +221,17 @@
   color: #666;
   font-size: 14px;
   margin-right: 100px;
-  .item_position {padding: 18px 0;}
-  .item_position span {flex: 1;}
-  .item_img {width: 22px;height: 22px;border-radius: 50%;overflow: hidden;}
+  .icon .iconfont { margin-left: 2px;font-size: 18px; }
+  .item_position { padding: 18px 0; }
+  .item_position span { flex: 1; }
+  .item_img { width: 22px;height: 22px;border-radius: 50%;overflow: hidden;}
   .item_img_gray{-webkit-filter: grayscale(100%);opacity: .5;}
-  .item_meta {display: flex;background: transparent;line-height: 32px;}
-  .item_meta span {flex: 1;text-align: center;}
-  .item_meta span:first-child {flex: initial;width: 30px;padding-left: 12px;}
-  .header {height: 36px;line-height: 36px;}
-  .sort {position: relative;}
-  .sort:before, .sort:after {width: 0;height: 0;overflow: hidden;border-color: transparent;border-top: 6px solid #ddd;}
+  .item_meta { display: flex;background: transparent;line-height: 32px;width: 100%; }
+  .item_meta span { flex: 1;text-align: center; }
+  .item_meta span:first-child { flex: initial;width: 30px;padding-left: 12px; }
+  .header { height: 36px;line-height: 36px; }
+  .sort { position: relative; }
+  .sort:before, .sort:after { width: 0;height: 0;overflow: hidden;border-color: transparent;border-top: 6px solid #ddd; }
 }
 #main .icon-xingxing {color: #999;opacity: 1;}
 #main .active {color: #F5CD13;}

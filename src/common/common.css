@@ -43,6 +43,7 @@
   // background: rgba(000, 000, 000, .4);
   background: -webkit-linear-gradient(top, rgba(255, 255, 255, 0), rgba(255, 255, 255, .9), rgba(255, 255, 255, 1));
 }
+.light .item_tab .item_thead { background: #EBEBEB; }
 .light #gotop { background: transparent;border: 1px solid #ebebeb;color: #999; }
 
 /* ------ 深色主题 ------ */
@@ -75,6 +76,7 @@
 .dark .footer { color: #ccc; }
 .dark #main .iconfont:hover { opacity: 1; }
 .dark #gotop { background: #39373F;color: #999; }
+.dark .item_tab .item_thead { background: #100F13; }
 /* star */
 .star_bg { background: #D2D7DA; }
 

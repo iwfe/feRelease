@@ -205,6 +205,7 @@ const upload = {
 
   /*
   对比变动和新增文件
+  注意不要被nginx拦截
    */
   computedFiles: async (ctx) => {
     log('查找新增和改动的文件')
@@ -214,7 +215,6 @@ const upload = {
     const bucket = params.bucket.bucket
     const itemPath = params.bucket.folder + params.devName
     const item = await mysql(params.dev, 'select * from iw_static_resource where projectId=' + params.projectId)
-
     if (item && item.length) {
       const _id = {}
       const _db = {}
@@ -224,7 +224,6 @@ const upload = {
         _db[val['keyPath']] = item[key].fileMd5 // 部分文件md5 为空字符串
         _id[val['keyPath']] = item[key].id
       })
-
       const _r = Object.keys(_db)
       util.forEach(local, (val, key) => {
         if (_r.indexOf(key) <= -1) {
@@ -232,6 +231,7 @@ const upload = {
         }
       })
       if (Object.keys(add).length) {
+        log('处理新增文件')
         for (const key in add) {
           const _key = itemPath + util.addVersion(key, params.version)
           await oss.uploadFileStream(bucket, _key, add[key]).then(async (res) => {
@@ -259,7 +259,6 @@ const upload = {
           })
         }
       }
-
       util.forEach(fileMd5, (val, key) => {
         // 如果数据库不存在 或者上次上传失败
         // _db[key] 就等于 undefined
@@ -270,8 +269,8 @@ const upload = {
           _md5[key] = val
         }
       })
-
       if (Object.keys(diff).length) {
+        log('处理变动文件')
         for (const key in diff) {
           const _key = itemPath + util.addVersion(key, params.version)
           await oss.uploadFileStream(bucket, _key, diff[key]).then(async (res) => {
@@ -292,6 +291,10 @@ const upload = {
               util.fail(ctx, 20016)
               return
             }
+          }).catch((err) => {
+            log(err)
+            util.fail(ctx, 20016)
+            return
           })
         }
       }
@@ -311,6 +314,10 @@ const upload = {
             const fileMd5 = md5File.sync(local[key])
             await mysql(params.dev, `INSERT INTO iw_static_resource (keyPath,ossUrl,version,projectId,createTime,updateTime,fileMd5) VALUES ('${key}','${res.url}','${params.version}','${params.projectId}','${createTime}','${updateTime}',${fileMd5})`)
           }
+        }).catch((err) => {
+          log(err)
+          util.fail(ctx, 20016)
+          return
         })
       }
     }

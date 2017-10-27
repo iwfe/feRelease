@@ -72,7 +72,8 @@ export const starItem = ({ commit }) => { // 当前页面刷新如何
     commit(type.MENUACTIVE, {})
     setItem({ commit })
   } else {
-    if (Star.length === 0) Star = window.config.test.split(',')
+    console.log(Star)
+    if (Star.length === 0) Star = window.config[dev].split(',')
     api.axios('getItemStar', 'post', { itemId: Star, dev }, (res) => {
       setItem({ commit }, res)
       commit(type.MENUACTIVE, {})

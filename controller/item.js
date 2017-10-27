@@ -130,7 +130,7 @@ module.exports = {
 
       // 验证 name
       const item_name = await mysql(dev, 'SELECT * FROM iw_static_project WHERE isDelete=0 and name="' + name + '"')
-      if (item_name.length >= 2) {// 提交的 name 不会存在两个以上
+      if (item_name.length >= 2) { // 提交的 name 不会存在两个以上
         util.fail(ctx, 20007)
         return
       }

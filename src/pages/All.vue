@@ -122,13 +122,13 @@
       },
       editMenu () {
         let input = null
-        Confirm({
+        const confirm = Confirm({
           title: '修改名称',
           text: '<div><input id="editInput" value="' + this.menuactive.name + '" placeholder="输入菜单名" type="texr" style="width: 100%;resize: none; border: 1px solid #ddd;height: 36px;line-height: 36px;text-align: center;font-size:16px;" /></div>',
           ready: () => {
             input = document.querySelector('#editInput')
             input.addEventListener('keydown', (e) => {
-              if (e.keyCode === 13) conform.remove('ok')
+              if (e.keyCode === 13) confirm.remove('ok')
             })
             input.focus()
           }

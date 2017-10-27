@@ -64,7 +64,14 @@
       const name = this.$route.query.name
       if (name) this.$refs.text.value = name
     },
+    beforeDestroy () {
+      console.log('准备销毁listView')
+    },
+    destroy () {
+      console.log('销毁listView')
+    },
     beforeRouteEnter (to, from, next) {
+      console.log('进入listView组件')
       next(vm => { // e_e!
         if (to.name === 'star') {
           vm.itemStyle = 'list'
@@ -77,9 +84,11 @@
       })
     },
     beforeRouteUpdate (to, from, next) {
+      console.log('更新listView组件')
       next()
     },
     beforeRouteLeave (to, from, next) {
+      console.log('离开listView组件') // 离开会在router之前触发
       next()
     },
     methods: {

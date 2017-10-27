@@ -129,3 +129,9 @@ export const filterNewItem = (newMenu) => {
   }
 }
 
+export const history = (() => {
+  const history = window.sessionStorage
+  history.clear()
+  history.setItem('/', 0)
+  return history
+})()
