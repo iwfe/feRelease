@@ -1,16 +1,9 @@
-// const co = require('co')
 const fs = require('fs')
 const path = require('path')
-// const OSS = require('ali-oss')
 const oss = require('ali-oss-extra').default
 const _conf = fs.readFileSync(path.resolve(__dirname, '../config/oss.json'), 'utf8')
 const log = (str) => console.log(str)
 
-/*
-  max-keys : 5
-  prefix: name
-  //fe-release.oss-cn-hangzhou.aliyuncs.com/
-*/
 const method = (params = {}) => {
   const store = new oss(Object.assign({}, JSON.parse(_conf), params))
   return {
@@ -42,21 +35,6 @@ const method = (params = {}) => {
 }
 
 module.exports = method
-
-// const os = method()
-
-// os.delFile('fe-release', 'haha/haha.js').then((res) => {
-//   log(res)
-// })
-
-// os.uploadFileStream('fe-release', 'haha/haha.js', path.join(__dirname, '../tmp/staticResource.properties')).then((res) => {
-//   log(res)
-// })
-
-// os.addBucket('fe-release').then((res) => {
-//   log(res)
-// })
-
 
 
 

@@ -7,7 +7,7 @@
 */
 
 export const api = (key) => {
-  const root = window.config.siteUrl
+  // const root = window.config.siteUrl
   return root + {
     signout: 'signout', // 注销
     signin: 'signin', // 登录 原始表单

@@ -445,22 +445,3 @@ const upload = {
 
 module.exports = upload
 
-// http://10.7.249.20:8134/weixinEnt/iwwallet/agentTrade/qiangKePayIndex
-// rp('http://house-test-water.oss.aliyuncs.com/iwjw-pc_beta/staticResource.properties').then((res) => {
-// })
-// const conf_md5 = md5File.sync(abs('../tmp/staticResource.properties'))
-// log(conf_md5)
-
-// const d = fs.createWriteStream('a.conf')
-// request('http://house-test-water.oss.aliyuncs.com/iwjw-wxent_beta/staticResource.properties').pipe(d).on('close', () => {
-//   const conf_md5 = md5File.sync(abs('../tmp/staticResource.properties'))
-//   log(conf_md5) // e4634d8dc07c13a8c0daf07f71dc8212
-// })
-
-// const d = fs.readFileSync(abs('../tmp/staticResourceConfig.properties'))
-// log('本地')
-// log(d)
-
-// http://house-test-water.oss.aliyuncs.com/iwjw-wxent_beta/qiangKePayIndex_5.js
-// http://house-test-water.oss.aliyuncs.com/iwjw-wxent_beta/qiangKePayIndex_5.css
-

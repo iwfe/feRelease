@@ -8,10 +8,6 @@ const conf = require('../config')
 
 module.exports = {
 
-  async postImg (ctx) {
-    //
-  },
-
   async staticCheckKey (ctx, next) {
     try {
       fse.emptyDirSync(path.resolve(__dirname, '../dist'))
@@ -45,50 +41,5 @@ module.exports = {
     } else {
       util.fail(ctx)
     }
-  },
-
-  // 测试用
-  async get (ctx) {
-    // const data = await ctx.myPool().query('SELECT * FROM iw_static_project')
-    // const data = await mysql('test', 'select * from iw_static_resource where projectId=25 limit 10')
-    await mysql('beta', 'update iw_static_project set onoff=1 where id=8')
-    // const data = await ctx.myPool().query('select * from iw_static_resource where projectId=25')
-    ctx.body = {
-      status: 1
-    }
-  },
-
-  async post (ctx) {
-    const { name } = ctx.request.body
-    console.log(name)
-    ctx.body = {
-      status: 1,
-      data: name
-    }
   }
-
-  // async queryTest (ctx) {
-  //   const sql = 'SELECT * FROM iw_static_project limit 25'
-  //   const dataList = await query(sql)
-  //   ctx.body = {
-  //     status: 1,
-  //     data: dataList
-  //   }
-  // }
 }
-
-
-// let readFileMd5 = (url) =>{
-//   return new Promise((reslove) => {
-//     let md5sum = crypto.createHash('md5');
-//     let stream = fs.createReadStream(url);
-//     stream.on('data', function(chunk) {
-//       md5sum.update(chunk);
-//     });
-//     stream.on('end', function() {
-//       let fileMd5 = md5sum.digest('hex');
-//       reslove(fileMd5);
-//     })
-//   })
-// }
-

@@ -35,12 +35,12 @@ export function axios (key, method, params, success, fail) {
 export function postImg (params, cb) {
   const xhr = new XMLHttpRequest()
   xhr.open('POST', api('upload'))
-  xhr.send(params)
   xhr.onreadystatechange = () => {
     if (xhr.readyState === 4 && xhr.status === 200) {
       cb && cb(JSON.parse(xhr.response))
     }
   }
+  xhr.send(params)
 }
 // https://github.com/mzabriskie/axios/issues/569
 /* 未验证 axios 上传 */

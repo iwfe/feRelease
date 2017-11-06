@@ -7,8 +7,6 @@
   "scripts": {
     "vue": "node ./build/vue",
     "dev": "node ./build/dev",
-    "hot": "node ./build/dev-hot",
-    "pro": "node ./build/dev-build",
     "build": "node ./build/build",
     "start": "nodemon app.js",
     "upload": "node ./util/upload",

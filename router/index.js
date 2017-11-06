@@ -12,9 +12,9 @@ const uploadStatic = busboy(conf.staticDirectory)
 // const uploadImage = busboy(conf.staticDirectory)
 const route = new Router({ prefix: '/' })
 
+route.get('', util.checkLogin, util.getUser, util.render)
 route.get('signin', util.render)
 route.get('search', util.checkLogin, util.getUser, util.render)
-route.get('', util.checkLogin, util.getUser, util.render)
 route.get('all', util.checkLogin, util.getUser, util.render)
 route.get('star', util.checkLogin, util.getUser, util.render)
 route.get('home/*', util.checkLogin, util.getUser, util.render)
@@ -46,10 +46,6 @@ route.post('uploadStatic', control.staticCheckKey, uploadStatic, control.staticU
 route.post('app/logger', util.checkLogin, log.post)
 route.get('app/logger', log.get)
 route.post('feRelease', upload.createTmp, upload.unZip, upload.processManifest, upload.computedFiles)
-
-// 测试
-route.get('test', control.get)
-route.post('test', control.post)
 
 route.get('*', util.render)
 
