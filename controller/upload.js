@@ -11,7 +11,7 @@ const mysql = require('../util/mysql')
 const rp = require('request-promise')
 const request = require('request')
 const formidable = require("formidable") // multipart/form-data 解析
-const log = (str) => {console.log(str)}
+const log = console.log
 const abs = (url) => path.resolve(__dirname, url)
 let local = {}
 let fileMd5 = {}
@@ -331,6 +331,10 @@ const upload = {
     })
     fs.openSync(abs('../tmp/staticResource.properties'), 'a')
     fs.writeFileSync(abs('../tmp/staticResource.properties'), text)
+    // 外层添加花括号 再去生成 md5 值,试试
+    // let _files = fs.readFileSync(abs('../tmp/staticResource.properties')), 'utf8')
+    // log(_files)
+    // 处理成 {a=b,c=d} 再去生成 conf_md5
     const conf_md5 = md5File.sync(abs('../tmp/staticResource.properties'))
     await oss.uploadFileStream(bucket, itemPath + 'staticResource.properties', abs('../tmp/staticResource.properties')).then((res) => {
       // log(res.url)
