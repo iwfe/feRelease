@@ -104,7 +104,7 @@ export function uploadItem (key, params, cb) {
 }
 
 const source = Axios.CancelToken.source()
-Axios.defaults.timeout = 2000
+Axios.defaults.timeout = 6000
 Axios.interceptors.request.use((conf) => {
   return conf
 }, (err) => {
